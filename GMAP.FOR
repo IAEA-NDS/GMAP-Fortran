@@ -254,7 +254,7 @@ C
       DO 34 L=1,NE1
       READ(3,103) EX1,CSX1
   103 FORMAT(2E10.4)
-      IF(EX1 .EQ. 0.) GO TO 35
+      IF(EX1 .EQ. 0.D0) GO TO 35
       NR=NR+1
       EN(NR)=EX1
       CS(NR)=CSX1
@@ -399,7 +399,7 @@ CVP      if(modrep .ne. 0) go to 183
 C
 C      READ(3,    ) NORMALIZATION UNCERTAINTIES
 C
-      XNORU=0.
+      XNORU=0.D0
       IF(MTTP .EQ. 2 ) GO TO 200
       READ(3,201) (ENFF(ID,L),L=1,10),(NENF(ID,L),L=1,10)
   201 FORMAT(10F5.1,10I3)
@@ -436,7 +436,7 @@ C
       DO 21 KS=1,LDA
       READ(3,109) E(NADD),CSS(NADD),(CO(L,NADD),L=1,12)
   109 FORMAT(2E10.4,12F5.1)
-      IF(E(NADD) .EQ. 0.) GO TO 95
+      IF(E(NADD) .EQ. 0.D0) GO TO 95
 C
 C      SORT EXP ENERGIES  TO FIND CORRESPONDING INDEX OF EVALUATION EN
 C
@@ -452,7 +452,7 @@ C
       JI=MCS(NT(L),3)
       DO 12 K=JE,JI
       E1=.999*EN(K)
-      E2=1.001*EN(K)
+      E2=1.001D0*EN(K)
       IF(E(NADD) .GT. E1 .AND. E(NADD) .LT. E2) GO TO 75
    12 CONTINUE
       GO TO 15
@@ -583,14 +583,16 @@ C
       IF(NETG(L,ID) .EQ. 0) GO TO 214
       FKS=EPAF(1,L,ID)+EPAF(2,L,ID)
       XYY=EPAF(2,L,ID)-(E(KS)-E(KT))/(EPAF(3,L,ID)*E(KS))
-      IF(XYY .LT. 0.) XYY=0.
+      IF(XYY .LT. 0.D0) XYY=0.
       FKT=EPAF(1,L,ID)+XYY
       Q1=Q1+CO(L,KS)*CO(L,KT)*FKS*FKT
   214 CONTINUE
   215 CONTINUE
       CERR=(Q1+XNORU)/(C1*C2)
-      IF(CERR .GT. .99) CERR= .99
-  162 ECOR(KS,KT)=CERR
+C     FIXED THE SINGLE PRECISION ASSIGNMENT
+      IF(CERR .GT. .99) CERR= .99D0
+      ECOR(KS,KT)=CERR
+  162 CONTINUE
       ECOR(KS,KS)=1.
    62 CONTINUE
 C
@@ -650,7 +652,7 @@ C
   312 NC2=NC2-10
       IF(NETG(NC2,II) .EQ. 9) GO TO 2802
       XYY=EPAF(2,NC2,II)-ABS(E(K)-E(KK))/(EPAF(3,NC2,II)*E(KK))
-      IF(XYY .LT. 0.) XYY=0.
+      IF(XYY .LT. 0.D0) XYY=0.D0
       FKS=EPAF(1,NC2,II)+XYY
       GO TO 2803
  2802 FKS=1.
@@ -700,7 +702,7 @@ CVP   PRIOR/EXP column is added
       DO 29 K=NALT,NADD1
       CSSK=CSS(K)
       DCSK=DCS(K)
-      WXX=1./(DCSK*DCSK)
+      WXX=1.D0/(DCSK*DCSK)
       WWT=WWT+WXX
    97 KX=KAS(K,1)
       KY=KAS(K,2)
@@ -739,7 +741,8 @@ CVP      if(modrep .ne. 0) go to 2627
       GO TO 28
  2826 CONTINUE
       IF(MODREP .NE. 0) GO TO 63
-      AP=1.0/AP
+C     FIXED THE SINGLE PRECISION ASSIGNMENT
+      AP=1.0D0/AP
       CS(L)=AP
       GO TO 28
    63 AP=CS(L)
@@ -748,7 +751,8 @@ C
 C      FILL AA,AM,AND COV
 C
       DO 18 KS=NALT,NADD1
-      DQQQ=DCS(KS)*CSS(KS)*0.01
+C     FIXED THE SINGLE PRECISION ASSIGNMENT
+      DQQQ=DCS(KS)*CSS(KS)*0.01D0
       J =KAS(KS,1)
       I =KAS(KS,2)
       I8=KAS(KS,3)
@@ -851,12 +855,12 @@ C
       DO 53 LI=J1,J2
       NW=NW+1
       FL=FL+FIS(NW)
-      EL1=(EN(LI)+EN(LI-1))*0.5
-      EL2=(EN(LI)+EN(LI+1))*0.5
-      DE1=(EN(LI)-EL1)*0.5
-      DE2=(EL2-EN(LI))*0.5
-      SS1=.5*(CS(LI)+0.5*(CS(LI)+CS(LI-1)))
-      SS2=.5*(CS(LI)+0.5*(CS(LI)+CS(LI+1)))
+      EL1=(EN(LI)+EN(LI-1))*0.5D0
+      EL2=(EN(LI)+EN(LI+1))*0.5D0
+      DE1=(EN(LI)-EL1)*0.5D0
+      DE2=(EL2-EN(LI))*0.5D0
+      SS1=.5*(CS(LI)+0.5D0*(CS(LI)+CS(LI-1)))
+      SS2=.5*(CS(LI)+0.5D0*(CS(LI)+CS(LI+1)))
       CSSLI=(SS1*DE1+SS2*DE2)/(DE1+DE2)
       SFL=SFL+CSSLI*FIS(NW)
    53 CONTINUE
@@ -872,12 +876,12 @@ C
       KR=KA(J,1)
       KA(J,KR+1)=N
       IF(J .EQ. JA .OR. J .EQ. JE) GO TO 195
-      EL1=(EN(J)+EN(J-1))*0.5
-      EL2=(EN(J)+EN(J+1))*0.5
-      DE1=(EN(J)-EL1)*0.5
-      DE2=(EL2-EN(J))*0.5
-      SS1=.5*(CS(J)+0.5*(CS(J)+CS(J-1)))
-      SS2=.5*(CS(J)+0.5*(CS(J)+CS(J+1)))
+      EL1=(EN(J)+EN(J-1))*0.5D0
+      EL2=(EN(J)+EN(J+1))*0.5D0
+      DE1=(EN(J)-EL1)*0.5D0
+      DE2=(EL2-EN(J))*0.5D0
+      SS1=.5*(CS(J)+0.5D0*(CS(J)+CS(J-1)))
+      SS2=.5*(CS(J)+0.5D0*(CS(J)+CS(J+1)))
       CSSJ=(SS1*DE1+SS2*DE2)/(DE1+DE2)
       GO TO 196
   195 CSSJ=CS(J)
@@ -1119,26 +1123,26 @@ C
       DO 77 K=JA,JI
       KBK=K*(K-1)/2+K
       DDX=CS(K)*DSQRT(B(KBK))
-      CXX=CS(K)*(1.+DE(K))
-      CXXD=100.*(CXX-CS(K))/CXX
+      CXX=CS(K)*(1.D0+DE(K))
+      CXXD=100.D0*(CXX-CS(K))/CXX
       DO 705 KK=1,NFIS
-      IF(ENFIS(KK).GT. .999*EN(K).AND.ENFIS(KK).LT. 1.001*EN(K))
+      IF(ENFIS(KK).GT. .999D0*EN(K).AND.ENFIS(KK).LT. 1.001D0*EN(K))
      1 GO TO 703
   705 CONTINUE
       GO TO 706
   703 IF(K .EQ. JA .OR. K .EQ. JI) GO TO 295
-      EL1=(EN(K)+EN(K-1))*0.5
-      EL2=(EN(K)+EN(K+1))*0.5
-      DE1=(EN(K)-EL1)*0.5
-      DE2=(EL2-EN(K))*0.5
-      SS1=.5*(CXX+0.5*(CXX+(1.+DE(K-1))*CS(K-1)))
-      SS2=.5*(CXX+0.5*(CXX+(1.+DE(K+1))*CS(K+1)))
+      EL1=(EN(K)+EN(K-1))*0.5D0
+      EL2=(EN(K)+EN(K+1))*0.5D0
+      DE1=(EN(K)-EL1)*0.5D0
+      DE2=(EL2-EN(K))*0.5D0
+      SS1=.5*(CXX+0.5D0*(CXX+(1.D0+DE(K-1))*CS(K-1)))
+      SS2=.5*(CXX+0.5D0*(CXX+(1.D0+DE(K+1))*CS(K+1)))
       CSSK=(SS1*DE1+SS2*DE2)/(DE1+DE2)
       GO TO 296
   295 CSSK=CXX
   296 CONTINUE
       FLX=FLX+FIS(KK)*CSSK
-  706 FQW=DDX*100./CXX
+  706 FQW=DDX*100.D0/CXX
       SECS=DSQRT(EN(K))*CXX
       WRITE(4,153) EN(K),CXX,DDX,FQW,CXXD,SECS
       WRITE(5,153) EN(K),CXX,DDX,FQW,CXXD,SECS
@@ -1164,8 +1168,8 @@ C
       KK=K*(K-1)/2+K
       ZCS=CS(K)
       DDX=CS(K)*DSQRT(B(KK))
-      CXX=CS(K)*(1.+DE(K))
-      DDXD=DDX*100./CXX
+      CXX=CS(K)*(1.D0+DE(K))
+      DDXD=DDX*100.D0/CXX
       WRITE(4,115) K,NSETN(LLX),CXX,DDX,DDXD,ZCS
       CS(K)=CXX
    82 CONTINUE
@@ -1330,10 +1334,10 @@ C
  2211 ECOR(K,L)=ECOR(L,K)
       DO 2212 K=1,N
  2212 ECOR(K,K)=1.
-      CXZ=0.10
+      CXZ=0.10D0
       DO 37 K=1,N
       DO 37 L=1,N
-      ECOR(K,L)=ECOR(K,L)/(1.+CXZ)
+      ECOR(K,L)=ECOR(K,L)/(1.D0+CXZ)
       IF(K .EQ. L) ECOR(K,L)=1.
    37 CONTINUE
       IF(IREP .LT. 15) GO TO 67
@@ -1562,9 +1566,9 @@ c
       double precision dx(1),dy(1),da                                   
       integer i,incx,incy,ix,iy,m,mp1,n                                 
 c                                                                       
-      if(n.le.0)return                                                  
+      if(n.le.0D0)return                                                  
       if (da .eq. 0.0d0) return                                         
-      if(incx.eq.1.and.incy.eq.1)go to 20                               
+      if(incx.eq.1.D0 .and. incy.eq.1D0)go to 20                               
 c                                                                       
 c        code for unequal increments or equal increments                
 c          not equal to 1                                               
@@ -1612,7 +1616,7 @@ c
       ddot = 0.0d0                                                      
       dtemp = 0.0d0                                                     
       if(n.le.0)return                                                  
-      if(incx.eq.1.and.incy.eq.1)go to 20                               
+      if(incx.eq.1.D0 .and.incy.eq. 1.D0) go to 20
 c                                                                       
 c        code for unequal increments or equal increments                
 c          not equal to 1                                               
