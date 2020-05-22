@@ -292,7 +292,7 @@ C
    24 CONTINUE
   665 CONTINUE
       WRITE(4,113) NR
-  113 FORMAT(2X/,' TOTAL NO OF PARAMETERS ',I4/)
+  113 FORMAT(/,' TOTAL NO OF PARAMETERS ',I4/)
 C
 C      for checking
 C
@@ -694,9 +694,9 @@ C
  2828 CONTINUE
       write(4,5173)
 CVP   PRIOR/EXP column is added
- 5173 format(/'  ENERGY/MEV   VALUE    ABS. UNCERT.  
-     1 PRIOR/EXP UNCERT./%    DIFF./%
-     1  VAL.*SQRT(E)'/)
+ 5173 format(/'  ENERGY/MEV   VALUE    ABS. UNCERT. ',
+     1 ' PRIOR/EXP UNCERT./%    DIFF./%',
+     2 '  VAL.*SQRT(E)'/)
       AP=0.
       WWT=0.
       DO 29 K=NALT,NADD1
@@ -1115,8 +1115,8 @@ C
       WRITE(5,117) (CLAB(L,I),I=1,2)
   117 FORMAT(1H1,'   RESULT',5X,2A8//)
       WRITE(4,112)
-  112 FORMAT( '   E/MEV         CS/B            DCS/B       DCS/%
-     1DIF/%    CS*SQRT(E)'/)
+  112 FORMAT('   E/MEV         CS/B            DCS/B       DCS/%',
+     1'     DIF/%    CS*SQRT(E)'/)
       JA=MCS(L,2)
       JI=MCS(L,3)
       FLX=0.
