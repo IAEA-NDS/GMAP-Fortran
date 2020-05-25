@@ -22,7 +22,30 @@ there is a [short user guide] for DATP and GMAP and a more detailed
 ## About this repository
 
 The purpose of this repository is to track modifications to GMAP
-and tro provide a reference for future developments connected to this code.
+and tro provide a reference for future developments related to this code.
+
+### Modifications effected so far
+
+- Converted single precision numeric literals to double precision, e.g.,
+`0.5` to `0.5D0`, as otherwise the implicit conversion to double precision
+in assignments introduces small numerical differences beyond the 
+representational capabilities of single precision floats, e.g.,
+`x=0.99` may get converted to `x=0.990000090...` if `x` is double precision.
+
+- Modified a few format descriptors for printing table headings.
+Those format descriptors which involved strings and spanned several lines
+were not interpreted in the same way using the Intel and GNU Fortran
+compiler, i.e., printed strings had a different number of whitespace
+characters.
 
 Modifications can also be traced by inspecting the 
 [commit log](https://github.com/IAEA-NDS/GMAP-Fortran/commits/master).
+
+### Additional `debug` branch
+
+During the translation of this Fortran version to Python, statements have
+been introducedd to write additional information to file `debug.out` for
+debugging and ensuring the equivalence of the codes. The Fortran code
+with these additional statements is stored in the `debug` branch and
+those extra code blocks are enclosed by preprocessor directives `
+#ifdef VERIFY ... #endif` to facilitate enabling and disabling them.
