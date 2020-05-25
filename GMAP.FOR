@@ -42,6 +42,8 @@ CVP
 CVP Notations for most important variables are given by authors in comments.
 CVP Few were added under CVP comments 
 C
+C#define VERIFY
+
       IMPLICIT REAL*8 (A-H,O-Z)
       character*4 AKON,ACON,DUM
       character*8 CLABL,BREF,CLAB
@@ -128,6 +130,10 @@ C
       open(3,file='data.gma')
       open(4,file='gma.res')
       OPEN(5,FILE='plot.dta')
+#ifdef VERIFY
+      open(21,file='debug.out')
+ 1060 FORMAT('AFTER LABEL ',I4)
+#endif
 C
 C      CONTROL
 C      MODE    MODE OF EXP. CORRELATION MATRIX CONSTRUCTION
@@ -206,6 +212,9 @@ C
    50 READ(3,100) ACON,MC1,MC2,MC3,MC4,MC5,MC6,MC7,MC8
   100 FORMAT(A4,1X,8I5)
 C
+#ifdef VERIFY
+      WRITE(21,'(a,a4)') 'READING CONTROL PARAMETER ',ACON
+#endif
       DO 10 K=1,11
       IF(ACON .EQ. AKON(K)) GO TO (1,2,3,4,5,6,7,8,9,51,170),K
    10 CONTINUE
@@ -253,12 +262,18 @@ C
   120 FORMAT(2A8)
       DO 34 L=1,NE1
       READ(3,103) EX1,CSX1
+#ifdef VERIFY
+      WRITE(21,'(A,E10.4)') 'CSX1 ',CSX1
+#endif
   103 FORMAT(2E10.4)
       IF(EX1 .EQ. 0.D0) GO TO 35
       NR=NR+1
       EN(NR)=EX1
       CS(NR)=CSX1
    34 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L1 ',L
+#endif
    35 MCS(K,1)=L-1
    33 CONTINUE
 C
@@ -289,6 +304,9 @@ C
       LQ=LQ+1
   138 FORMAT(2X,2I4,3X,E10.4,3X,F15.8)
    23 WRITE(4,138) LQ,L,EN(L),CS(L)
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L2 ',L
+#endif
    24 CONTINUE
   665 CONTINUE
       WRITE(4,113) NR
@@ -314,7 +332,11 @@ C
 C      N     TOTAL NO OF DATA POINTS IN BLOCK
 C      ID    TOTAL NO OF DATA SETS IN BLOCK
 C
-    4 N=0
+    4 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'ENTERING LABEL ',4
+#endif
+      N=0
       ID=0
       DO 32 K=1,LDA
       AM(K)=0.D0
@@ -330,6 +352,9 @@ CVPEND*****************************************************************
   165 KAS(K,J)=0
       DO 32 L=1,LDA
    32 ECOR(K,L)=0.D0
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L3 ',L
+#endif
       NADD=1
       if(modrep .ne. 0) go to 50
       WRITE(4,108)
@@ -349,6 +374,9 @@ C      MC7 NT(3)   SAME
 C      MC8 NNCOX   DIVIDE UNCERTAINTIES BY 10.
 C
     2 NS=MC1
+#ifdef VERIFY
+      WRITE(21,'(a,I5)') 'READING DATASET ',NS
+#endif
       MT=MC2
       NCOX=MC3
       NCT=MC4
@@ -371,6 +399,9 @@ C
       IF(MT .EQ. 8 .OR. MT .EQ. 9) GO TO 510
       GO TO 511
   510 MTTP=2
+#ifdef VERIFY
+      WRITE(21,1060) 510
+#endif
       IDEN(ID,8)=2
   511 CONTINUE
 CVP      if(modrep .ne. 0) go to 140
@@ -381,9 +412,15 @@ CVP      if(modrep .ne. 0) go to 140
       NCT2=NCT-NU
       NU1=NU+1
       WRITE(4,139)MC1,TYPE(MT),((CLAB(NT(K),L),L=1,2),K=1,NU)
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L4 ',L
+#endif
   139 FORMAT(2X,8HDATA SET,I5,2X,A16,4(2X,2A8))
       IF(NCT2 .LE. 0) GO TO 140
       WRITE(4,149)((CLAB(NT(K),L),L=1,2),K=NU1,NCT2)
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L5 ',L
+#endif
   149 FORMAT(2X,6(2X,2A8))
   140 CONTINUE
 C
@@ -408,6 +445,9 @@ C      CALCULATE TOTAL NORMALIZATION UNCERTAINTY
 C
       DO 208 L=1,10
   208 XNORU=XNORU+(ENFF(ID,L))**2
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L6 ',L
+#endif
   200 CONTINUE
 C
 C      READ(3,    ) ENERGY DEPENDENT UNCERTAINTY PARAMETERS
@@ -463,6 +503,9 @@ C      Exception for dummy data sets
 C
       IF(NS .GE. 900 .AND. NS .LE. 909) CSS(NADD)=CS(K)
    48 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L7 ',L
+#endif
 C
 C      this is the Axton special (uncertainties have been multiplied by 10
 C         in order to preserve precision beyond 0.1%)
@@ -512,6 +555,9 @@ C
       RELU=0.
       DO 207 L=3,11
   207 RELU=RELU+(CO(L,NADD))**2
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L8 ',L
+#endif
       DCS(NADD)=DSQRT(XNORU+RELU)
       NADD=NADD+1
    15 CONTINUE
@@ -563,6 +609,15 @@ C
       DO 61 KS=1,NCOX
   161 FORMAT(10F8.5)
    61 READ(3,161) (ECOR(KS,L),L=1,KS)
+
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'ECOR READ 1 - DATASET ',NS
+      DO 1010 IR=1,NCOX
+      WRITE(21,'(A,I4,A,I4)') 'ROW ',IR,' OF ',NCOX
+      WRITE(21,'(10E18.10)') (ECOR(IR,L),L=1,IR)
+ 1010 CONTINUE
+      WRITE(21,'(A,I4)') 'END ECOR READ 1 ',NS
+#endif
       MODC=MODAL
       GO TO 79
 C
@@ -588,9 +643,20 @@ C
       Q1=Q1+CO(L,KS)*CO(L,KT)*FKS*FKT
   214 CONTINUE
   215 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(A,I5)') 'deb L9 ',L
+#endif
       CERR=(Q1+XNORU)/(C1*C2)
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') 'unlimited CERR ',CERR
+#endif
 C     FIXED THE SINGLE PRECISION ASSIGNMENT
       IF(CERR .GT. .99) CERR= .99D0
+#ifdef VERIFY
+      WRITE(21,'(A,I3,A,I3,A,E16.10)') 
+     1'ECOR(',KS,',',KT,')= ',ECOR(KS,KT)
+      WRITE(21,'(A,4E16.10)') 'Q1/XNORU/C1/C2 ',Q1,XNORU,C1,C2
+#endif
       ECOR(KS,KT)=CERR
   162 CONTINUE
       ECOR(KS,KS)=1.
@@ -690,6 +756,9 @@ C
       NSHP=NSHP+1
       NSETN(NSHP)=NS
       L=NR+NSHP
+#ifdef VERIFY
+      WRITE(21,'(A,3I5)') 'L/NR/NSHP ',L,NR,NSHP
+#endif
       IF(L .GT. LDB) GO TO 76
  2828 CONTINUE
       write(4,5173)
@@ -744,6 +813,9 @@ CVP      if(modrep .ne. 0) go to 2627
 C     FIXED THE SINGLE PRECISION ASSIGNMENT
       AP=1.0D0/AP
       CS(L)=AP
+#ifdef VERIFY
+      WRITE(21,'(A,E20.12)') 'AP ',AP 
+#endif
       GO TO 28
    63 AP=CS(L)
    28 CONTINUE
@@ -753,6 +825,9 @@ C
       DO 18 KS=NALT,NADD1
 C     FIXED THE SINGLE PRECISION ASSIGNMENT
       DQQQ=DCS(KS)*CSS(KS)*0.01D0
+#ifdef VERIFY
+      WRITE(21,'(A,3E20.12)') 'DQQQ ',DQQQ,DCS(KS),CSS(KS)
+#endif
       J =KAS(KS,1)
       I =KAS(KS,2)
       I8=KAS(KS,3)
@@ -783,36 +858,57 @@ C
 C      CROSS SECTION
 C
    41 CX=CS(J)
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '41 ',CX
+#endif
       AA(J,KR)=CX/DQQQ
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '41x ',AA(J,KR)
+#endif
       GO TO 36
 C
 C      CROSS SECTION SHAPE    L is shape data norm. const. index
 C
    42 continue
       CX=CS(J)*AP
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '42 ',CX
+#endif
       CXX=CX/DQQQ
       AA(J,KR)=CXX
       KA(L,1)=KA(L,1)+1
       KR=KA(L,1)
       KA(L,KR+1)=N
       AA(L,KR)= CXX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '42x ',AA(L,KR)
+#endif
       GO TO 36
 C
 C      RATIO
 C
    43 CX=CS(J)/CS(I)
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '43 ',CX
+#endif
       CCX=CX/DQQQ
       AA(J,KR)=CCX
       KA(I,1)=KA(I,1)+1
       KR=KA(I,1)
       KA(I,KR+1)=N
       AA(I,KR)=-CCX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '43x ',AA(I,KR)
+#endif
       GO TO 36
 C
 C      RATIO SHAPE
 C
    44 continue
       CX=CS(J)*AP/CS(I)
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '44 ',CX
+#endif
       CXX=CX/DQQQ
       AA(J,KR)=CXX
       KA(I,1)=KA(I,1)+1
@@ -823,6 +919,9 @@ C
       KR=KA(L,1)
       KA(L,KR+1)=N
       AA(L,KR)= CXX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '44x ',AA(L,KR)
+#endif
       GO TO 36
 C
 C      TOTAL CROSS SECTION
@@ -831,12 +930,19 @@ C
       DO 49 I=1,NCT
       II=KAS(KS,I)
    49 CX=CX+CS(II)
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '45 ',CX
+#endif
       DO 60 I=1,NCT
       J =KAS(KS,I)
       KA(J,1)=KA(J,1)+1
       KR=KA(J,1)
       KA(J,KR+1)=N
-   60 AA(J,KR)=CS(J)/DQQQ
+      AA(J,KR)=CS(J)/DQQQ
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '45x ',AA(J,KR)
+#endif
+   60 CONTINUE
       GO TO 36
 C
 C      FISSION AVERAGE
@@ -886,7 +992,12 @@ C
       GO TO 196
   195 CSSJ=CS(J)
   196 CONTINUE
-   39 AA(J,KR)=CSSJ*FIS(K)/DQQQ
+      AA(J,KR)=CSSJ*FIS(K)/DQQQ
+#ifdef VERIFY
+      WRITE(21,'(A,4E20.10)') '46x AA/CSSJ/FIS/DQQQ ',
+     1 AA(J,KR), CSSJ, FIS(K), DQQQ
+#endif
+   39 CONTINUE
       GO TO 36
 C
 C   ABSOLUTE RATIO S1/(S2+S3)
@@ -895,24 +1006,39 @@ C
       IF(I .EQ. J) GO TO 251
       CBX=CX/DQQQ
       AA(J,KR)=CBX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '247x1 ',AA(J,KR)
+#endif
       KA(I,1)=KA(I,1)+1
       KR=KA(I,1)
       KA(I,KR+1)=N
       CBX2=CBX*CBX*DQQQ/CS(J)
       CCX=CBX2*CS(I)
       AA(I,KR)=-CCX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '247x2 ',AA(I,KR)
+#endif
       KA(I8,1)=KA(I8,1)+1
       KR=KA(I8,1)
       KA(I8,KR+1)=N
       CCX=CBX2*CS(I8)
       AA(I8,KR)=-CCX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '247x3 ',AA(I8,KR)
+#endif
       GO TO 36
   251 CBX=CX*CX*CS(I8)/(CS(J)*DQQQ)
       AA(J,KR)=CBX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '251x1 ',AA(J,KR)
+#endif
       KA(I8,1)=KA(I8,1)+1
       KR=KA(I8,1)
       KA(I8,KR+1)=N
       AA(I8,KR)=-CBX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '251x2 ',AA(I8,KR)
+#endif
       GO TO 36
 C
 C   SHAPE OF SUM
@@ -927,11 +1053,18 @@ C
       KA(J,1)=KA(J,1)+1
       KR=KA(J,1)
       KA(J,KR+1)=N
-  254 AA(J,KR)=CS(J)*APDQ
+      AA(J,KR)=CS(J)*APDQ
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '248x1 ',AA(J,KR)
+#endif
+  254 CONTINUE
       KA(L,1)=KA(L,1)+1
       KR=KA(L,1)
       KA(L,KR+1)=N
       AA(L,KR)=CX/DQQQ
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '248x2 ',AA(L,KR)
+#endif
       GO TO 36
 C
 C   SHAPE OF RATIO S1/(S2+S3)
@@ -942,31 +1075,52 @@ C
       CBX=CX/DQQQ
       IF(I .EQ. J) GO TO 390
       AA(J,KR)=CBX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x1 ',AA(J,KR)
+#endif
       KA(I,1)=KA(I,1)+1
       KR=KA(I,1)
       KA(I,KR+1)=N
       CDX=CBX*CS(I)/CII8
       AA(I,KR)=-CDX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x2 ',AA(I,KR)
+#endif
       KA(I8,1)=KA(I8,1)+1
       KR=KA(I8,1)
       KA(I8,KR+1)=N
       CDX=CBX*CS(I8)/CII8
       AA(I8,KR)=-CDX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x3 ',AA(I8,KR)
+#endif
       KA(L,1)=KA(L,1)+1
       KR=KA(L,1)
       KA(L,KR+1)=N
       AA(L,KR)=CBX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x4 ',AA(L,KR)
+#endif
       GO TO 36
   390 CCX=CBX*CS(I8)/CII8
       AA(J,KR)=CCX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x5 ',AA(J,KR)
+#endif
       KA(I8,1)=KA(I8,1)+1
       KR=KA(I8,1)
       KA(I8,KR+1)=N
       AA(I8,KR)=-CCX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x6 ',AA(I8,KR)
+#endif
       KA(L,1)=KA(L,1)+1
       KR=KA(L,1)
       KA(L,KR+1)=N
       AA(L,KR)=CBX
+#ifdef VERIFY
+      WRITE(21,'(A,E16.10)') '249x7 ',AA(L,KR)
+#endif
       GO TO 36
    36 AM(N)=(CSS(KS)-CX)/DQQQ
       GO TO 667
@@ -1006,12 +1160,50 @@ C
 C
 C      INVERT ECOR
 C
+#ifdef VERIFY
+ 1052 FORMAT('DATASET',I5,' ECOR before inversion',
+     1' (upper triangular part)')
+      WRITE(21,1052) NS
+      DO 1001 IR=1,N
+      WRITE(21,'(A,I4,A,I4)') 'ROW ',IR,' OF ',N
+ 1001 WRITE(21,'(10E18.10)') (ECOR(IR,L),L=IR,N)
+      WRITE(21,'(a,I4)') 'END OF DATASET ',NS
+#endif
       IF(MODC .EQ. 2) GO TO 19
       IF(N .EQ. 1) GO TO 19
       CALL DPOFA(ECOR,LDA,N,INFO)
-      IF(INFO .NE. 0) GO TO 31
+      IF(INFO .NE. 0) THEN
+#ifdef VERIFY
+          WRITE(21,'(A,I4)') 'CHOL FAILED - ',NS
+#endif
+          GO TO 31
+      ENDIF
+
+#ifdef VERIFY
+ 1054 FORMAT('DATASET',I5,' ECOR after cholesky',
+     1' (upper triangular part)')
+      WRITE(21,1054) NS
+      DO 1003 IR=1,N
+      WRITE(21,'(A,I4,A,I4)') 'ROW ',IR,' OF ',N
+ 1003 WRITE(21,'(10E18.10)') (ECOR(IR,L),L=IR,N)
+      WRITE(21,'(a,I4)') 'END OF DATASET ',NS
+#endif
+
       JOB=1
       CALL DPODI(ECOR,LDA,N,DET,JOB)
+
+#ifdef VERIFY
+ 1050 FORMAT('ROW ',I4,' OF ',I4)
+ 1051 FORMAT(10E18.10)
+ 1053 FORMAT('DATASET',I5,' ECOR after inversion',
+     1' (upper triangular part)')
+      WRITE(21,1053) NS
+      DO 1002 IR=1,N
+      WRITE(21,1050) IR,N
+ 1002 WRITE(21,1051) (ECOR(IR,L),L=IR,N)
+      WRITE(21,'(a,I4)') 'END OF DATASET ',NS
+#endif
+
       DO 17 K=2,N
       L1=K-1
       DO 17 L=1,L1
@@ -1026,6 +1218,9 @@ C
 C
 C      GET MATRIX PRODUCTS
 C
+#ifdef VERIFY
+      WRITE(21,'(a,I4)') 'GET MATRIX PRODUCTS ',NS
+#endif
       NRS=NR+NSHP
       DO 90 I=1,NRS
       NI=KA(I,1)
@@ -1039,7 +1234,18 @@ C
       DO 85 MJ=1,NJ
       MJX=KA(J,MJ+1)
       B(IJ)=B(IJ)+AA(I,MI)*AA(J,MJ)*ECOR(MIX,MJX)
+#ifdef VERIFY
+      IF (I .eq. 382 .and. J .eq. 516) THEN
+      WRITE(21,'(A,6I5,3E20.10)')
+     1 'I/MI/J/MJ/MIX/MJX/AA/ECOR ',
+     2 I,MI,J,MJ,MIX,MJX,
+     3 AA(I,MI),AA(J,MJ),ECOR(MIX,MJX)
+       END IF
+#endif
    85 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(A,I5,I5,E20.10)') 'I/J/B: ',I,J,B(IJ)
+#endif
    84 CONTINUE
    83 CONTINUE
    92 CONTINUE
@@ -1054,6 +1260,9 @@ C
    86 CONTINUE
    93 CONTINUE
    91 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(a)') 'AFTER LABEL 91'
+#endif
       DO 26 I=1,N
       SUX=0.
       DO 52 J=1,N
@@ -1072,6 +1281,9 @@ C
 C      GETTING THE RESULT
 C
     3 CONTINUE
+#ifdef VERIFY
+      WRITE(21,'(a)') 'REWIND FILE'
+#endif
       REWIND 3
       write(*,6919)
  6919 format(' start getting the result ')
@@ -1091,13 +1303,30 @@ C
  7103 FORMAT(2E16.8)
       write(*,6918)
  6918 format(' start on matrix inversion ')
+#ifdef VERIFY
+      WRITE(21,'(A)') 'GLOBECOR before inversion'
+      WRITE(21,'(10E20.10)') (B(J), J=1,10000)
+      WRITE(21, '(A)') 'END OF GLOBECOR'
+#endif
       CALL DPPFA(B,NRS,INFO)
-      IF(INFO .NE. 0) GO TO 40
+      IF(INFO .NE. 0) THEN
+#ifdef VERIFY
+          WRITE(21,'(a)') 'CHOL2 FAILED'
+#endif
+          GO TO 40
+      ENDIF
       WRITE(4,9171)
       WRITE(*,9171)
  9171 FORMAT(' INVERT SOLUTION MATRIX')
       JOB=1
       CALL DPPDI(B,NRS,DET,JOB)
+
+#ifdef VERIFY
+      WRITE(21,'(A)') 'GLOBECOR after inversion'
+      WRITE(21,'(10E16.10)') (B(J), J=1,10000)
+      WRITE(21, '(A)') 'END OF GLOBECOR'
+#endif
+
       write(*,6917)
  6917 format(' completed inversion of matrix')
 CC
@@ -1110,6 +1339,9 @@ CC
 C
 C      output of the result
 C
+#ifdef VERIFY
+          WRITE(21,'(a)') 'OUTPUT OF RESULT'
+#endif
       DO 14 L=1,NC
       WRITE(4,117) (CLAB(L,I),I=1,2)
       WRITE(5,117) (CLAB(L,I),I=1,2)
@@ -1149,6 +1381,9 @@ C
       IF(MODAP .EQ. 0) GO TO 58
       IF(MODAP .EQ. 2 .AND. K .LE. MCS(5,3)) GO TO 58
       CS(K)=CXX
+#ifdef VERIFY
+      WRITE(21,'(A,E20.10)') '77 APR.CS ',CS(K)
+#endif
    58 CONTINUE
   153 FORMAT(1X,E10.4,2F15.8,2X,F6.1,3X,F7.2,3X,F10.5)
    77 CONTINUE
@@ -1172,6 +1407,9 @@ C
       DDXD=DDX*100.D0/CXX
       WRITE(4,115) K,NSETN(LLX),CXX,DDX,DDXD,ZCS
       CS(K)=CXX
+#ifdef VERIFY
+      WRITE(21,'(A,E20.10)') '82 APR.CS ',CS(K)
+#endif
    82 CONTINUE
   115 FORMAT(2I6,4F10.4)
  5115 FORMAT(2I6,2D20.12,F10.4)
@@ -1190,6 +1428,10 @@ C
       DO 73 L=1,LDBB2
    73 B(L)=0.D0
 CC
+#ifdef VERIFY
+      WRITE(21,'(A)') 'BEFORE REWIND LOOP'
+#endif
+
       DO 69 L=1,2000
       READ(3,130)DUM   
   130 FORMAT(A4)
@@ -1348,6 +1590,7 @@ C
    40 WRITE(4,106)
       STOP
   105 FORMAT(/' EXP BLOCK CORREL. MATRIX NOT PD',20X,'***** WARNING *')
+
   106 FORMAT( '  SOLUTION  CORREL. MATRIX NOT PD ' )
       END
       SUBROUTINE DPODI(A,LDA,N,DET,JOB)                                 
