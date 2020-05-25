@@ -796,7 +796,7 @@ C
 CVP   AZ print out was added
       WRITE(4,133) E(K),CSSK,FDQ,AZ,DCSK,DIFF,SECS
 CVP   Print out for Ratio of pior/exp value is added
-  133 FORMAT(2X,E10.4,2X,E10.4,2X,E10.4,3X,F6.4,3X,F6.1,
+  133 FORMAT(2X,E10.4,2X,E10.4,2X,E10.4,3X,F6.4,3X,F6.2,
      1 3X,F10.1,3X,F10.4)
    99 CONTINUE
 C
