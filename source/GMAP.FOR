@@ -728,7 +728,7 @@ CVP   AZ print out was added
       WRITE(4,133) E(K),CSSK,FDQ,AZ,DCSK,DIFF,SECS
 CVP   Print out for Ratio of pior/exp value is added
   133 FORMAT(2X,E10.4,2X,E10.4,2X,E10.4,3X,F6.4,3X,F6.2,
-     1 3X,F10.1,3X,F10.4)
+     1 3X,F10.2,3X,F10.4)
    99 CONTINUE
 C
    29 AP=AP+AZ*WXX
@@ -1001,7 +1001,7 @@ C
   101 FORMAT(1H*//,'   CORRELATION MATRIX OF DATA BLOCK'/)
       DO 65 K=1,N
    65 WRITE(4,151) (ECOR(K,L),L=1,K)
-  151 FORMAT(1X,24F5.2)
+  151 FORMAT(1X,24F7.4)
    67 CONTINUE
 C
 C      INVERT ECOR
