@@ -1160,7 +1160,7 @@ CVP   13 lines below are added by VP, 26 July, 2004
       WRITE(4,588) EN(JA)*500000.,
      1 (((EN(K)+EN(K+1))*500000.),K=JA,JI-1),
      2 (-EN(JI-1)+3*EN(JI))*500000.
-      WRITE(4,588) (((EN(K)*1000000.),CS(K)),K=JA,JI)
+      WRITE(4,588) (EN(K)*1000000.,CS(K),K=JA,JI)
   588 FORMAT(6(1X,E10.5))
       DO 688 K=JA+1,JI-1
       DSMOOA=(CS(K+1)*(EN(K)-EN(K-1))
