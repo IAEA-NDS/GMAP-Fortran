@@ -7,6 +7,8 @@ C
 C          W.P. POENITZ,ANL
 C
 C*******************************************************************************
+CVP 26 July 2004: Output of covariance matrices in B-6 format (MF=33, LB=5,6)
+CVP               was added.
 CVP 20 Aug 2003: size of parameter vector was increased from 995 to 1200
 CVP and B(X) from X=500000 to X=720600
 CVP 2001:Minor correction was introduced by V.G. Pronyaev in the version
@@ -95,7 +97,8 @@ C      EPAF    UNCERTAINTY COMPONENT PARAMETERS
 C      FCFC    CROSS CORRELATION FACTORS
 C
       COMMON /DATA/ E(250),CSS(250),DCS(250),FIS(250),ECOR(250,250)
-     1 ,ENFIS(250),CO(12,250),ENFF(30,10),EPAF(3,11,30),FCFC(10,10)
+     1 ,ENFIS(250),CO(12,250),ENFF(30,10),EPAF(3,11,30),FCFC(10,10),
+     2 AAA(250,250)
 C
 C      AA      COEFFICIENT MATRIX
 C      AM      MEASUREMENT VECTOR
@@ -107,8 +110,10 @@ CVP    B       matrix accumulating (in data block cycle) sum of
 CVP            AA(transpose)*ECOR*AA
 C      DE      ADJUSTMENT VECTOR
 CVP            equals B(inverse)*BM
+CVP    AAA     Full matrix of the correlation coefficients of ev. data
 C
       COMMON /GAUSS/ AA(1200,250),AM(250),DE(1200),BM(1200),B(720600)
+     1,EGR(200),EEGR(400),RELTRG(200,200),RELCOV(200,200)
 C
 C  IDEN(K,I)  K DATA SET SEQUENCE
 C
@@ -254,7 +259,7 @@ C
       DO 34 L=1,NE1
       READ(3,103) EX1,CSX1
   103 FORMAT(2E10.4)
-      IF(EX1 .EQ. 0.D0) GO TO 35
+      IF(EX1 .EQ. 0.) GO TO 35
       NR=NR+1
       EN(NR)=EX1
       CS(NR)=CSX1
@@ -292,7 +297,7 @@ C
    24 CONTINUE
   665 CONTINUE
       WRITE(4,113) NR
-  113 FORMAT(/,' TOTAL NO OF PARAMETERS ',I4/)
+  113 FORMAT(2X/,' TOTAL NO OF PARAMETERS ',I4/)
 C
 C      for checking
 C
@@ -399,7 +404,7 @@ CVP      if(modrep .ne. 0) go to 183
 C
 C      READ(3,    ) NORMALIZATION UNCERTAINTIES
 C
-      XNORU=0.D0
+      XNORU=0.
       IF(MTTP .EQ. 2 ) GO TO 200
       READ(3,201) (ENFF(ID,L),L=1,10),(NENF(ID,L),L=1,10)
   201 FORMAT(10F5.1,10I3)
@@ -436,7 +441,7 @@ C
       DO 21 KS=1,LDA
       READ(3,109) E(NADD),CSS(NADD),(CO(L,NADD),L=1,12)
   109 FORMAT(2E10.4,12F5.1)
-      IF(E(NADD) .EQ. 0.D0) GO TO 95
+      IF(E(NADD) .EQ. 0.) GO TO 95
 C
 C      SORT EXP ENERGIES  TO FIND CORRESPONDING INDEX OF EVALUATION EN
 C
@@ -452,7 +457,7 @@ C
       JI=MCS(NT(L),3)
       DO 12 K=JE,JI
       E1=.999*EN(K)
-      E2=1.001D0*EN(K)
+      E2=1.001*EN(K)
       IF(E(NADD) .GT. E1 .AND. E(NADD) .LT. E2) GO TO 75
    12 CONTINUE
       GO TO 15
@@ -583,16 +588,14 @@ C
       IF(NETG(L,ID) .EQ. 0) GO TO 214
       FKS=EPAF(1,L,ID)+EPAF(2,L,ID)
       XYY=EPAF(2,L,ID)-(E(KS)-E(KT))/(EPAF(3,L,ID)*E(KS))
-      IF(XYY .LT. 0.D0) XYY=0.
+      IF(XYY .LT. 0.) XYY=0.
       FKT=EPAF(1,L,ID)+XYY
       Q1=Q1+CO(L,KS)*CO(L,KT)*FKS*FKT
   214 CONTINUE
   215 CONTINUE
       CERR=(Q1+XNORU)/(C1*C2)
-C     FIXED THE SINGLE PRECISION ASSIGNMENT
-      IF(CERR .GT. .99) CERR= .99D0
-      ECOR(KS,KT)=CERR
-  162 CONTINUE
+      IF(CERR .GT. .99) CERR= .99
+  162 ECOR(KS,KT)=CERR
       ECOR(KS,KS)=1.
    62 CONTINUE
 C
@@ -652,7 +655,7 @@ C
   312 NC2=NC2-10
       IF(NETG(NC2,II) .EQ. 9) GO TO 2802
       XYY=EPAF(2,NC2,II)-ABS(E(K)-E(KK))/(EPAF(3,NC2,II)*E(KK))
-      IF(XYY .LT. 0.D0) XYY=0.D0
+      IF(XYY .LT. 0.) XYY=0.
       FKS=EPAF(1,NC2,II)+XYY
       GO TO 2803
  2802 FKS=1.
@@ -694,15 +697,15 @@ C
  2828 CONTINUE
       write(4,5173)
 CVP   PRIOR/EXP column is added
- 5173 format(/'  ENERGY/MEV   VALUE    ABS. UNCERT. ',
-     1 ' PRIOR/EXP UNCERT./%    DIFF./%',
-     2 '  VAL.*SQRT(E)'/)
+ 5173 format(/'  ENERGY/MEV   VALUE    ABS. UNCERT.
+     1 PRIOR/EXP UNCERT./%    DIFF./%
+     1  VAL.*SQRT(E)'/)
       AP=0.
       WWT=0.
       DO 29 K=NALT,NADD1
       CSSK=CSS(K)
       DCSK=DCS(K)
-      WXX=1.D0/(DCSK*DCSK)
+      WXX=1./(DCSK*DCSK)
       WWT=WWT+WXX
    97 KX=KAS(K,1)
       KY=KAS(K,2)
@@ -727,8 +730,8 @@ C
 CVP   AZ print out was added
       WRITE(4,133) E(K),CSSK,FDQ,AZ,DCSK,DIFF,SECS
 CVP   Print out for Ratio of pior/exp value is added
-  133 FORMAT(2X,E10.4,2X,E10.4,2X,E10.4,3X,F6.4,3X,F6.2,
-     1 3X,F10.2,3X,F10.4)
+  133 FORMAT(2X,E10.4,2X,E10.4,2X,E10.4,3X,F6.4,3X,F6.1,
+     1 3X,F10.1,3X,F10.4)
    99 CONTINUE
 C
    29 AP=AP+AZ*WXX
@@ -741,8 +744,7 @@ CVP      if(modrep .ne. 0) go to 2627
       GO TO 28
  2826 CONTINUE
       IF(MODREP .NE. 0) GO TO 63
-C     FIXED THE SINGLE PRECISION ASSIGNMENT
-      AP=1.0D0/AP
+      AP=1.0/AP
       CS(L)=AP
       GO TO 28
    63 AP=CS(L)
@@ -751,8 +753,7 @@ C
 C      FILL AA,AM,AND COV
 C
       DO 18 KS=NALT,NADD1
-C     FIXED THE SINGLE PRECISION ASSIGNMENT
-      DQQQ=DCS(KS)*CSS(KS)*0.01D0
+      DQQQ=DCS(KS)*CSS(KS)*0.01
       J =KAS(KS,1)
       I =KAS(KS,2)
       I8=KAS(KS,3)
@@ -855,12 +856,12 @@ C
       DO 53 LI=J1,J2
       NW=NW+1
       FL=FL+FIS(NW)
-      EL1=(EN(LI)+EN(LI-1))*0.5D0
-      EL2=(EN(LI)+EN(LI+1))*0.5D0
-      DE1=(EN(LI)-EL1)*0.5D0
-      DE2=(EL2-EN(LI))*0.5D0
-      SS1=.5*(CS(LI)+0.5D0*(CS(LI)+CS(LI-1)))
-      SS2=.5*(CS(LI)+0.5D0*(CS(LI)+CS(LI+1)))
+      EL1=(EN(LI)+EN(LI-1))*0.5
+      EL2=(EN(LI)+EN(LI+1))*0.5
+      DE1=(EN(LI)-EL1)*0.5
+      DE2=(EL2-EN(LI))*0.5
+      SS1=.5*(CS(LI)+0.5*(CS(LI)+CS(LI-1)))
+      SS2=.5*(CS(LI)+0.5*(CS(LI)+CS(LI+1)))
       CSSLI=(SS1*DE1+SS2*DE2)/(DE1+DE2)
       SFL=SFL+CSSLI*FIS(NW)
    53 CONTINUE
@@ -876,12 +877,12 @@ C
       KR=KA(J,1)
       KA(J,KR+1)=N
       IF(J .EQ. JA .OR. J .EQ. JE) GO TO 195
-      EL1=(EN(J)+EN(J-1))*0.5D0
-      EL2=(EN(J)+EN(J+1))*0.5D0
-      DE1=(EN(J)-EL1)*0.5D0
-      DE2=(EL2-EN(J))*0.5D0
-      SS1=.5*(CS(J)+0.5D0*(CS(J)+CS(J-1)))
-      SS2=.5*(CS(J)+0.5D0*(CS(J)+CS(J+1)))
+      EL1=(EN(J)+EN(J-1))*0.5
+      EL2=(EN(J)+EN(J+1))*0.5
+      DE1=(EN(J)-EL1)*0.5
+      DE2=(EL2-EN(J))*0.5
+      SS1=.5*(CS(J)+0.5*(CS(J)+CS(J-1)))
+      SS2=.5*(CS(J)+0.5*(CS(J)+CS(J+1)))
       CSSJ=(SS1*DE1+SS2*DE2)/(DE1+DE2)
       GO TO 196
   195 CSSJ=CS(J)
@@ -1001,7 +1002,10 @@ C
   101 FORMAT(1H*//,'   CORRELATION MATRIX OF DATA BLOCK'/)
       DO 65 K=1,N
    65 WRITE(4,151) (ECOR(K,L),L=1,K)
-  151 FORMAT(1X,24F7.4)
+  151 FORMAT(1X,24F5.2)
+      DO 265 K=1,N
+  265 WRITE(4,351) E(K),(ECOR(K,L),L=1,N)
+  351 FORMAT(2X,f7.3,1x,70(E10.4,1x))
    67 CONTINUE
 C
 C      INVERT ECOR
@@ -1115,34 +1119,34 @@ C
       WRITE(5,117) (CLAB(L,I),I=1,2)
   117 FORMAT(1H1,'   RESULT',5X,2A8//)
       WRITE(4,112)
-  112 FORMAT('   E/MEV         CS/B            DCS/B       DCS/%',
-     1'     DIF/%    CS*SQRT(E)'/)
+  112 FORMAT( '   E/MEV         CS/B            DCS/B       DCS/%
+     1DIF/%    CS*SQRT(E)'/)
       JA=MCS(L,2)
       JI=MCS(L,3)
       FLX=0.
       DO 77 K=JA,JI
       KBK=K*(K-1)/2+K
       DDX=CS(K)*DSQRT(B(KBK))
-      CXX=CS(K)*(1.D0+DE(K))
-      CXXD=100.D0*(CXX-CS(K))/CXX
+      CXX=CS(K)*(1.+DE(K))
+      CXXD=100.*(CXX-CS(K))/CXX
       DO 705 KK=1,NFIS
-      IF(ENFIS(KK).GT. .999D0*EN(K).AND.ENFIS(KK).LT. 1.001D0*EN(K))
+      IF(ENFIS(KK).GT. .999*EN(K).AND.ENFIS(KK).LT. 1.001*EN(K))
      1 GO TO 703
   705 CONTINUE
       GO TO 706
   703 IF(K .EQ. JA .OR. K .EQ. JI) GO TO 295
-      EL1=(EN(K)+EN(K-1))*0.5D0
-      EL2=(EN(K)+EN(K+1))*0.5D0
-      DE1=(EN(K)-EL1)*0.5D0
-      DE2=(EL2-EN(K))*0.5D0
-      SS1=.5*(CXX+0.5D0*(CXX+(1.D0+DE(K-1))*CS(K-1)))
-      SS2=.5*(CXX+0.5D0*(CXX+(1.D0+DE(K+1))*CS(K+1)))
+      EL1=(EN(K)+EN(K-1))*0.5
+      EL2=(EN(K)+EN(K+1))*0.5
+      DE1=(EN(K)-EL1)*0.5
+      DE2=(EL2-EN(K))*0.5
+      SS1=.5*(CXX+0.5*(CXX+(1.+DE(K-1))*CS(K-1)))
+      SS2=.5*(CXX+0.5*(CXX+(1.+DE(K+1))*CS(K+1)))
       CSSK=(SS1*DE1+SS2*DE2)/(DE1+DE2)
       GO TO 296
   295 CSSK=CXX
   296 CONTINUE
       FLX=FLX+FIS(KK)*CSSK
-  706 FQW=DDX*100.D0/CXX
+  706 FQW=DDX*100./CXX
       SECS=DSQRT(EN(K))*CXX
       WRITE(4,153) EN(K),CXX,DDX,FQW,CXXD,SECS
       WRITE(5,153) EN(K),CXX,DDX,FQW,CXXD,SECS
@@ -1152,6 +1156,21 @@ C
    58 CONTINUE
   153 FORMAT(1X,E10.4,2F15.8,2X,F6.1,3X,F7.2,3X,F10.5)
    77 CONTINUE
+CVP   13 lines below are added by VP, 26 July, 2004
+      WRITE(4,588) EN(JA)*500000.,
+     1 (((EN(K)+EN(K+1))*500000.),K=JA,JI-1),
+     2 (-EN(JI-1)+3*EN(JI))*500000.
+      WRITE(4,588) (((EN(K)*1000000.),CS(K)),K=JA,JI)
+  588 FORMAT(6(1X,E10.5))
+      DO 688 K=JA+1,JI-1
+      DSMOOA=(CS(K+1)*(EN(K)-EN(K-1))
+     1 +CS(K-1)*(EN(K+1)-EN(K))
+     2 -CS(K)*(EN(K+1)-EN(K-1)))
+     3 /2./(EN(K+1)-EN(K-1))
+      DSMOOR=DSMOOA/CS(K)*100.
+      SSMOO=CS(K)+DSMOOA
+  688 WRITE(4,153) EN(K),CS(K),SSMOO,DSMOOR
+CVP above is writing CS in B-6 format and smoothing with CS conserving
       WRITE(4,158) FLX
   158 FORMAT(1H*//,'  FISSION AVERAGE ' ,F8.4//)
    14 CONTINUE
@@ -1168,8 +1187,8 @@ C
       KK=K*(K-1)/2+K
       ZCS=CS(K)
       DDX=CS(K)*DSQRT(B(KK))
-      CXX=CS(K)*(1.D0+DE(K))
-      DDXD=DDX*100.D0/CXX
+      CXX=CS(K)*(1.+DE(K))
+      DDXD=DDX*100./CXX
       WRITE(4,115) K,NSETN(LLX),CXX,DDX,DDXD,ZCS
       CS(K)=CXX
    82 CONTINUE
@@ -1203,27 +1222,69 @@ C
       DO 78  K=1,NC
       J1=MCS(K,2)
       J2=MCS(K,3)
+CVP   3 lines below are added by VP, 26 July, 2004
+      NROW=J2-J1+2
+      DO 188 III=1,NROW
+  188 EGR(III)=1.0*III
+CVP
       DO 80 L=1,K
       WRITE(4,122) (CLAB(K,J),J=1,2),(CLAB(L,J),J=1,2)
   122 FORMAT(1H1, '  CORRELATION MATRIX OF THE RESULT   ',2A8,2A8///)
       J3=MCS(L,2)
       J4=MCS(L,3)
+CVP   3 lines below are added by VP, 26 July 2004
+      NCOL=J4-J3+2
+      DO 288 III=1,NROW+NCOL
+  288 EEGR(III)=1.0*III
+CVP
       IF(K .EQ. L) GO TO 87
       DO 88 I=J1,J2
       II=I*(I-1)/2+I
       DO 16 J=J3,J4
       IJ=I*(I-1)/2+J
       JJ=J*(J-1)/2+J
-   16 BM(J)=B(IJ)/DSQRT(B(II)*B(JJ))
+CVP Line below is added by VP, 26 July 2004
+      RELCOV(I-J1+1,J-J3+1)=B(IJ)
+CVP three lines below are incerted by VP
+      BM(J)=B(IJ)/DSQRT(B(II)*B(JJ))
+      AAA(i-j1+1,j-j3+1)=BM(j)
+      AAA(j-j3+1,i-j1+1)=BM(j)
+   16 Continue
    88 WRITE(4,151) (BM( M),M=J3,J4)
+CVP   Lines below are added by VP, 26 July, 2004
+      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
+     1 ((RELCOV(III,JJJ),JJJ=1,NCOL-1),III=1,NROW-1)
+      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
+     1 ((RELCOV(III,JJJ),III=1,NROW-1),JJJ=1,NCOL-1)
+CVP
+CVP   print below is inserted by VP Aug2013
+	IMAX=j2-j1+1
+	do 392 i=1,imax
+  392 write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j4-j3+1)
+  389 format(2x,f7.3,1x,200(E10.4,1x))
       GO TO 300
    87 DO 55 I=J1,J2
       II=I*(I-1)/2+I
       DO 27 J=J1,I
       IJ=I*(I-1)/2+J
       JJ=J*(J-1)/2+J
-   27 BM(J)=B(IJ)/DSQRT(B(II)*B(JJ))
+CVP   Line below are added by VP, 26 July, 2004
+      RELTRG(I-J1+1,J-J1+1)=B(IJ)
+CVP
+      BM(J)=B(IJ)/DSQRT(B(II)*B(JJ))
+      AAA(i-j1+1,j-j1+1)=BM(j)
+      AAA(j-j1+1,i-j1+1)=BM(j)
+   27 continue
    55  WRITE(4,151) (BM( M),M=J1,I)
+      IMAX=J2-J1+1
+	do 387 i=1,IMAX
+	write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j2-j1+1)
+  387 continue
+CVP   Lines below are added by VP, 26 July, 2004
+      WRITE(4,388) (EGR(KI),KI=1,NROW),
+     1 ((RELTRG(III,JJJ),III=JJJ,NROW-1),JJJ=1,NROW-1)
+  388 FORMAT(6E11.4)
+CVP
   300 CONTINUE
    80 CONTINUE
    78 CONTINUE
@@ -1334,10 +1395,10 @@ C
  2211 ECOR(K,L)=ECOR(L,K)
       DO 2212 K=1,N
  2212 ECOR(K,K)=1.
-      CXZ=0.10D0
+      CXZ=0.10
       DO 37 K=1,N
       DO 37 L=1,N
-      ECOR(K,L)=ECOR(K,L)/(1.D0+CXZ)
+      ECOR(K,L)=ECOR(K,L)/(1.+CXZ)
       IF(K .EQ. L) ECOR(K,L)=1.
    37 CONTINUE
       IF(IREP .LT. 15) GO TO 67
@@ -1566,9 +1627,9 @@ c
       double precision dx(1),dy(1),da
       integer i,incx,incy,ix,iy,m,mp1,n
 c
-      if(n.le.0D0)return
+      if(n.le.0)return
       if (da .eq. 0.0d0) return
-      if(incx.eq.1.D0 .and. incy.eq.1D0)go to 20
+      if(incx.eq.1.and.incy.eq.1)go to 20
 c
 c        code for unequal increments or equal increments
 c          not equal to 1
@@ -1616,7 +1677,7 @@ c
       ddot = 0.0d0
       dtemp = 0.0d0
       if(n.le.0)return
-      if(incx.eq.1.D0 .and.incy.eq. 1.D0) go to 20
+      if(incx.eq.1.and.incy.eq.1)go to 20
 c
 c        code for unequal increments or equal increments
 c          not equal to 1
