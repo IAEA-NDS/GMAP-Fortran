@@ -1157,10 +1157,10 @@ C
   153 FORMAT(1X,E10.4,2F15.8,2X,F6.1,3X,F7.2,3X,F10.5)
    77 CONTINUE
 CVP   13 lines below are added by VP, 26 July, 2004
-      WRITE(4,588) EN(JA)*500000.,
-     1 (((EN(K)+EN(K+1))*500000.),K=JA,JI-1),
-     2 (-EN(JI-1)+3*EN(JI))*500000.
-      WRITE(4,588) (EN(K)*1000000.,CS(K),K=JA,JI)
+CG    WRITE(4,588) EN(JA)*500000.,
+CG   1 (((EN(K)+EN(K+1))*500000.),K=JA,JI-1),
+CG   2 (-EN(JI-1)+3*EN(JI))*500000.
+CG    WRITE(4,588) (EN(K)*1000000.,CS(K),K=JA,JI)
   588 FORMAT(6(1X,E10.5))
       DO 688 K=JA+1,JI-1
       DSMOOA=(CS(K+1)*(EN(K)-EN(K-1))
@@ -1169,7 +1169,8 @@ CVP   13 lines below are added by VP, 26 July, 2004
      3 /2./(EN(K+1)-EN(K-1))
       DSMOOR=DSMOOA/CS(K)*100.
       SSMOO=CS(K)+DSMOOA
-  688 WRITE(4,153) EN(K),CS(K),SSMOO,DSMOOR
+CG    WRITE(4,153) EN(K),CS(K),SSMOO,DSMOOR
+  688 Continue
 CVP above is writing CS in B-6 format and smoothing with CS conserving
       WRITE(4,158) FLX
   158 FORMAT(1H*//,'  FISSION AVERAGE ' ,F8.4//)
@@ -1252,15 +1253,16 @@ CVP three lines below are incerted by VP
    16 Continue
    88 WRITE(4,151) (BM( M),M=J3,J4)
 CVP   Lines below are added by VP, 26 July, 2004
-      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
-     1 ((RELCOV(III,JJJ),JJJ=1,NCOL-1),III=1,NROW-1)
-      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
-     1 ((RELCOV(III,JJJ),III=1,NROW-1),JJJ=1,NCOL-1)
+CG      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
+CG     1 ((RELCOV(III,JJJ),JJJ=1,NCOL-1),III=1,NROW-1)
+CG      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
+CG     1 ((RELCOV(III,JJJ),III=1,NROW-1),JJJ=1,NCOL-1)
 CVP
 CVP   print below is inserted by VP Aug2013
 	IMAX=j2-j1+1
 	do 392 i=1,imax
-  392 write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j4-j3+1)
+CG    write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j4-j3+1)
+  392 Continue
   389 format(2x,f7.3,1x,200(E10.4,1x))
       GO TO 300
    87 DO 55 I=J1,J2
@@ -1278,11 +1280,11 @@ CVP
    55  WRITE(4,151) (BM( M),M=J1,I)
       IMAX=J2-J1+1
 	do 387 i=1,IMAX
-	write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j2-j1+1)
+CG  write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j2-j1+1)
   387 continue
 CVP   Lines below are added by VP, 26 July, 2004
-      WRITE(4,388) (EGR(KI),KI=1,NROW),
-     1 ((RELTRG(III,JJJ),III=JJJ,NROW-1),JJJ=1,NROW-1)
+CG    WRITE(4,388) (EGR(KI),KI=1,NROW),
+CG   1 ((RELTRG(III,JJJ),III=JJJ,NROW-1),JJJ=1,NROW-1)
   388 FORMAT(6E11.4)
 CVP
   300 CONTINUE
