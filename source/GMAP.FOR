@@ -1157,9 +1157,9 @@ C
   153 FORMAT(1X,E10.4,2F15.8,2X,F6.1,3X,F7.2,3X,F10.5)
    77 CONTINUE
 CVP   13 lines below are added by VP, 26 July, 2004
-CG    WRITE(4,588) EN(JA)*500000.,
-CG   1 (((EN(K)+EN(K+1))*500000.),K=JA,JI-1),
-CG   2 (-EN(JI-1)+3*EN(JI))*500000.
+      WRITE(4,588) EN(JA)*500000.,
+     1 (((EN(K)+EN(K+1))*500000.),K=JA,JI-1),
+     2 (-EN(JI-1)+3*EN(JI))*500000.
 CG    WRITE(4,588) (EN(K)*1000000.,CS(K),K=JA,JI)
   588 FORMAT(6(1X,E10.5))
       DO 688 K=JA+1,JI-1
