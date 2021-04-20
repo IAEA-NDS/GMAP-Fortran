@@ -1255,8 +1255,8 @@ CVP three lines below are incerted by VP
 CVP   Lines below are added by VP, 26 July, 2004
       WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
      1 ((RELCOV(III,JJJ),JJJ=1,NCOL-1),III=1,NROW-1)
-CG    WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
-CG   1 ((RELCOV(III,JJJ),III=1,NROW-1),JJJ=1,NCOL-1)
+      WRITE(4,388) (EEGR(KI),KI=1,(NROW+NCOL)),
+     1 ((RELCOV(III,JJJ),III=1,NROW-1),JJJ=1,NCOL-1)
 CVP
 CVP   print below is inserted by VP Aug2013
 	IMAX=j2-j1+1
