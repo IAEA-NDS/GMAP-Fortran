@@ -1169,7 +1169,7 @@ CVP   13 lines below are added by VP, 26 July, 2004
      3 /2./(EN(K+1)-EN(K-1))
       DSMOOR=DSMOOA/CS(K)*100.
       SSMOO=CS(K)+DSMOOA
-CG    WRITE(4,153) EN(K),CS(K),SSMOO,DSMOOR
+      WRITE(4,153) EN(K),CS(K),SSMOO,DSMOOR
   688 Continue
 CVP above is writing CS in B-6 format and smoothing with CS conserving
       WRITE(4,158) FLX
