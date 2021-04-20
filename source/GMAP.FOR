@@ -1279,8 +1279,8 @@ CVP
    27 continue
    55  WRITE(4,151) (BM( M),M=J1,I)
       IMAX=J2-J1+1
-	do 387 i=1,IMAX
-CG  write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j2-j1+1)
+      do 387 i=1,IMAX
+      write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j2-j1+1)
   387 continue
 CVP   Lines below are added by VP, 26 July, 2004
 CG    WRITE(4,388) (EGR(KI),KI=1,NROW),
