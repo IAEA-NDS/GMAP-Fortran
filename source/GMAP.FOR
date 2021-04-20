@@ -1259,9 +1259,9 @@ CVP   Lines below are added by VP, 26 July, 2004
      1 ((RELCOV(III,JJJ),III=1,NROW-1),JJJ=1,NCOL-1)
 CVP
 CVP   print below is inserted by VP Aug2013
-	IMAX=j2-j1+1
-	do 392 i=1,imax
-CG    write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j4-j3+1)
+      IMAX=j2-j1+1
+      do 392 i=1,imax
+      write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j4-j3+1)
   392 Continue
   389 format(2x,f7.3,1x,200(E10.4,1x))
       GO TO 300
