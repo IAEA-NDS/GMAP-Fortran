@@ -1283,8 +1283,8 @@ CVP
       write(4,389) EN(ja+i-1),(AAA(i,j),j=1,j2-j1+1)
   387 continue
 CVP   Lines below are added by VP, 26 July, 2004
-CG    WRITE(4,388) (EGR(KI),KI=1,NROW),
-CG   1 ((RELTRG(III,JJJ),III=JJJ,NROW-1),JJJ=1,NROW-1)
+      WRITE(4,388) (EGR(KI),KI=1,NROW),
+     1 ((RELTRG(III,JJJ),III=JJJ,NROW-1),JJJ=1,NROW-1)
   388 FORMAT(6E11.4)
 CVP
   300 CONTINUE
