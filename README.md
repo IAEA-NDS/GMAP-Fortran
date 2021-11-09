@@ -38,6 +38,10 @@ were not interpreted in the same way using the Intel and GNU Fortran
 compiler, i.e., printed strings had a different number of whitespace
 characters.
 
+- Added code to fill the array ENFF with zeros before reading a new datablock.
+Otherwise uncertainty information associated with a previous datablock may leak
+into the new one and distorts results.
+
 Modifications can also be traced by inspecting the 
 [commit log](https://github.com/IAEA-NDS/GMAP-Fortran/commits/master).
 
